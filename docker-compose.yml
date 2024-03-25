@@ -1,0 +1,37 @@
+version: "3"
+services:
+  webserver:
+    image: nginx:latest
+    #map port from local computer to container
+    ports:
+      # -(hyphen) means array in yaml- port 80 from host will map onto port 80 on container
+      - "80:80"
+    #volume mapping, map files/folder from host into container
+    volumes:
+      - ./config/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+  app:
+    build: 
+      # context - location of set of files that the build can access
+      context: ./bin/php/php82
+      dockerfile: Dockerfile
+    volumes:
+      - ./app/src:/app/src
+  db:
+    build: 
+      context: ./bin/mysql/mysql8
+      dockerfile: Dockerfile
+    volumes:
+      - mysqldata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: parvesh
+      MYSQL_PASSWORD: parvesh
+      MYSQL_DATABASE: docker-php
+  cache:
+    image: redis:latest
+
+volumes:
+  mysqldata:
